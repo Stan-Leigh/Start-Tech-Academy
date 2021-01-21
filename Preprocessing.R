@@ -1,0 +1,102 @@
+df <- read.csv('C:/Users/ugonn/Videos/DS/ML Course/Data Files/1. ST Academy - Crash course and Regression files/House_Price.csv', header = TRUE)
+
+View(df)
+
+str(df)
+
+summary(df)
+
+# Analyze some columns suspected of having outliers or being skewed
+hist(df$crime_rate)
+# Plot plenty plots at a time
+pairs(~price+crime_rate+n_hot_rooms+rainfall, data = df)
+
+# Plot barplots for categorical variables
+barplot(table(df$airport))
+barplot(table(df$waterbody))
+barplot(table(df$bus_ter))
+
+# Obsevations
+# n_hot_rooms and rainfall has outliers
+# n_hos_beds has missing values
+# bus_ter is a useless variable
+# crime_rate has some other functional relationship with price
+
+# Capping and Flooring
+quantile(df$n_hot_rooms, 0.99)
+uv = 3 * quantile(df$n_hot_rooms, 0.99)
+df$n_hot_rooms[df$n_hot_rooms > uv] <- uv
+
+summary(df$n_hot_rooms)
+
+lv = 0.3 * quantile(df$rainfall, 0.01)
+df$rainfall[df$rainfall < lv] <- lv
+
+summary(df$rainfall)
+
+# Missing value imputation
+mean(df$n_hos_beds)
+mean(df$n_hos_beds, na.rm = TRUE)
+which(is.na(df$n_hos_beds))  # Lists rows with missing values
+df$n_hos_beds[is.na(df$n_hos_beds)] <- mean(df$n_hos_beds, na.rm = TRUE) 
+
+summary(df$n_hos_beds)
+which(is.na(df$n_hos_beds)) 
+
+
+# Variable transformation
+pairs(~price+crime_rate, data = df)  # or plot(df$price, df$crime_rate)
+
+df$crime_rate = log(1 + df$crime_rate)
+
+df$avg_dist = (df$dist1+df$dist2+df$dist3+df$dist4) / 4
+
+df2 <- df[, -7:-10]  # so you dont remove an important column  by mistake
+df <- df2
+rm(df2)
+
+df <- df[, -14]
+
+# install dummies package to be able to get dummy variables
+install.packages('dummies')
+
+df <- dummy.data.frame(df)
+
+df <- df[, -9]
+df <- df[, -14]
+
+# Correlation Analysis
+cor(df)
+round(cor(df), 2)
+
+df <- df[, -16]
+
+# Simple Linear Regression
+
+simple_model <- lm(price~room_num, data=df)
+summary(simple_model)
+
+plot(df$room_num, df$price)
+abline(simple_model)
+
+
+# Multiple Linear Regression
+multiple_model <- lm(price~., data=df)  # the '.' means all other columns.
+summary(multiple_model)
+
+
+# Train-Test-Split
+install.packages('caTools')
+
+set.seed(0)  # Like random state in python
+split = sample.split(df, SplitRatio = 0.8) # train_test_split in python
+training_set = subset(df, split == TRUE)
+test_set = subset(df, split == FALSE)
+
+lm_a = lm(price~.,data=training_set)
+
+train_a = predict(lm_a, training_set)
+test_a = predict(lm_a, test_set)
+
+mean((training_set$price - train_a)^2)
+mean((test_set$price - test_a)^2)
