@@ -100,3 +100,36 @@ test_a = predict(lm_a, test_set)
 
 mean((training_set$price - train_a)^2)
 mean((test_set$price - test_a)^2)
+
+
+# Subset selection techniques
+install.packages('leaps')
+
+lm_best = regsubsets(price~., data = df, nvmax = 15)  # Best subset selection technique
+# nvmax is the number of variables used in subset selection. default max is 8
+summary(lm_best)
+
+# To get the adjusted r2, which will show the best model:
+summary(lm_best)$adjr2
+
+which.max(summary(lm_best)$adjr2)
+
+coef(lm_best, 8)
+
+
+lm_forward = regsubsets(price~., data = df, nvmax = 15, method = 'forward')
+# forward selection technique
+summary(lm_forward)
+
+summary(lm_forward)$adjr2
+
+which.max(summary(lm_forward)$adjr2)
+
+
+lm_backward = regsubsets(price~., data = df, nvmax = 15, method = 'backward')
+# backward selection technique
+summary(lm_backward)
+
+summary(lm_backward)$adjr2
+
+which.max(summary(lm_backward)$adjr2)
