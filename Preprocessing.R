@@ -133,3 +133,43 @@ summary(lm_backward)
 summary(lm_backward)$adjr2
 
 which.max(summary(lm_backward)$adjr2)
+
+# Shrinkage methods: Ridge and Lasso Regression
+install.packages('glmnet')
+
+x = model.matrix(price~., data = df)[, -1]  # to remove the price column
+y = df$price
+
+grid = 10^seq(10, -2, length=100)  # values of lambda to check the one with lowest error.
+
+lm_ridge = glmnet(x, y, alpha=0, lambda=grid)
+
+cv_fit <- cv.glmnet(x, y, alpha=0, lambda = grid)
+plot(cv_fit)
+
+opt_lambda <- cv_fit$lambda.min  # value of lambda with smallest error
+
+# to get the r2 score
+tss <- sum((y - mean(y)) ^ 2)
+
+y_a = predict(lm_ridge, s=opt_lambda, newx = x) 
+
+rss = sum((y_a - y) ^ 2)
+
+rsq = 1 - (rss / tss)
+
+# Lasso
+lm_lasso = glmnet(x, y, alpha=1, lambda=grid) 
+
+cv_fit_lasso <- cv.glmnet(x, y, alpha=1, lambda = grid)
+plot(cv_fit_lasso)
+
+opt_lambda_lasso <- cv_fit_lasso$lambda.min
+
+tss_l <- sum((y - mean(y)) ^ 2)
+
+y_l = predict(lm_lasso, s=opt_lambda_lasso, newx = x) 
+
+rss_l = sum((y_l - y) ^ 2)
+
+rsq_l = 1 - (rss_l / tss_l)
