@@ -58,3 +58,13 @@ df <- df[,-13]
 df <- dummy.data.frame(df)
 df <- df[,-8]
 df <- df[,-13]
+
+
+# Logistic Regression with Single Predictor
+
+glm.fit = glm(Sold~price, data=df, family = binomial)
+summary(glm.fit)
+
+# Logistic Regression with multiple predictors
+glm.fit = glm(Sold~., data=df, family = binomial)
+summary(glm.fit)
