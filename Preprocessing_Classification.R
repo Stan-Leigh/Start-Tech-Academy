@@ -80,3 +80,18 @@ glm.pred[glm.probs > 0.5] <- 'YES'
 table(glm.pred, df$Sold)
 
 
+# Linear Discriminant Analysis
+lda.fit <- lda(Sold~., data = df )
+lda.fit
+
+lda.pred <- predict(lda.fit, df)
+lda.pred$posterior
+
+lda.class <- lda.pred$class
+
+table(lda.class, df$Sold)  # Confusion Matrix
+
+# To find number of values after adjusting the boundary
+sum(lda.pred$posterior[ ,1] > 0.8)
+
+# To run quadratic discriminant analysis, change lda to qda
