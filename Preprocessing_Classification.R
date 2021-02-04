@@ -95,3 +95,37 @@ table(lda.class, df$Sold)  # Confusion Matrix
 sum(lda.pred$posterior[ ,1] > 0.8)
 
 # To run quadratic discriminant analysis, change lda to qda
+
+
+set.seed(0)
+split = sample.split(df, SplitRatio = 0.8)
+train_set = subset(df, split == TRUE)
+test_set = subset(df, split == FALSE)
+
+# For Logistic Regression
+train.fit <- glm(Sold~., data = train_set, family = binomial)
+test.probs <- predict(train.fit, test_set, type = 'response')
+
+test.pred = rep('NO', 120)
+test.pred[test.probs > 0.5] <- 'YES'
+
+table(test.pred, test_set$Sold)
+
+
+# K Nearest Neighbor
+trainX <- train_set[, -16]
+testX <- test_set[, -16]
+trainy <- train_set$Sold
+testy <- test_set$Sold
+
+k <- 1
+
+# Don't forget to standardize the variables
+trainX_s = scale(trainX)
+testX_s = scale(testX)
+
+set.seed(0)
+
+knn.pred <- knn(trainX_s, testX_s, trainy, k = k)
+
+table(knn.pred, testy)
